@@ -1,3 +1,4 @@
 # We ignore the virtual environment folder
 venv_tx/
 data/options/*.csv
+**/__pycache__/
