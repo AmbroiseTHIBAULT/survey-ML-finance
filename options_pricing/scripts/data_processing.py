@@ -58,14 +58,16 @@ def create_batch_data_by_act_symbol(df, batch_size, features):
     return df_options_batch[features], df_options_batch['price']
 
 
-def create_train_test_set(X, y, test_size):
+def create_train_test_set(X, y, test_size, standardize):
     X_np = X.to_numpy()
     y_np = y.to_numpy()
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
     # Standardize data
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
+    scaler = None
+    if standardize:
+        scaler = StandardScaler()
+        X_train = scaler.fit_transform(X_train)
+        X_test = scaler.transform(X_test)
     return X_train, X_test, y_train, y_test, scaler
 
 def create_train_test_set_sep(df, test_value, train_size, features):
@@ -75,19 +77,19 @@ def create_train_test_set_sep(df, test_value, train_size, features):
     return X_train, y_train, X_test, y_test
 
 
-def create_train_test_set_idx(df, test_size, batch_size, features):
+def create_train_test_set_idx(df, test_size, batch_size, features, standardize):
     X, y = create_batch_data_idx_random(df, batch_size, features)
-    return create_train_test_set(X, y, test_size)
+    return create_train_test_set(X, y, test_size, standardize)
 
 
-def create_train_test_set_random(df, test_size, batch_size, features):
+def create_train_test_set_random(df, test_size, batch_size, features, standardize):
     X, y = create_batch_data_random(df, batch_size, features)
-    return create_train_test_set(X, y, test_size)
+    return create_train_test_set(X, y, test_size, standardize)
 
 
-def create_train_test_set_by_act_symbol(df, test_size, batch_size, features):
+def create_train_test_set_by_act_symbol(df, test_size, batch_size, features, standardize):
     X, y = create_batch_data_by_act_symbol(df, batch_size, features)
-    return create_train_test_set(X, y, test_size)
+    return create_train_test_set(X, y, test_size, standardize)
 
 
 def from_np_to_df(X, y, features):
