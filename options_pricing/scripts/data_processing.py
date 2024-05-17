@@ -58,10 +58,17 @@ def create_batch_data_by_act_symbol(df, batch_size, features):
     return df_options_batch[features], df_options_batch['price']
 
 
-def create_train_test_set(X, y, test_size, standardize):
+def create_train_test_set(X, y, test_size, standardize, df):
     X_np = X.to_numpy()
     y_np = y.to_numpy()
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
+    if test_size == 0:
+        # Here we are in the case where we will we test on all the rest of the data (not used for training or validation) 
+        X_train = X_np
+        y_train = y_np
+        X_test = df.drop(X.index)[X.columns].to_numpy()
+        y_test = df.drop(y.index)[y.name].to_numpy()
+    else:
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
     # Standardize data
     scaler = None
     if standardize:
@@ -89,7 +96,7 @@ def create_train_test_set_random(df, test_size, batch_size, features, standardiz
 
 def create_train_test_set_by_act_symbol(df, test_size, batch_size, features, standardize):
     X, y = create_batch_data_by_act_symbol(df, batch_size, features)
-    return create_train_test_set(X, y, test_size, standardize)
+    return create_train_test_set(X, y, test_size, standardize, df)
 
 
 def from_np_to_df(X, y, features):
