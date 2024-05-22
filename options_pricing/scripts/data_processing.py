@@ -73,8 +73,10 @@ def create_train_test_set(X, y, test_size, standardize, df):
     scaler = None
     if standardize:
         scaler = StandardScaler()
-        X_train = scaler.fit_transform(X_train)
-        X_test = scaler.transform(X_test)
+        X_train_np = scaler.fit_transform(X_train)
+        X_test_np = scaler.transform(X_test)
+        X_train = pd.DataFrame(X_train_np, columns=X.columns)
+        X_test = pd.DataFrame(X_test_np, columns=X.columns)
     return X_train, X_test, y_train, y_test, scaler
 
 def create_train_test_set_sep(df, test_value, train_size, features):
