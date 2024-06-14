@@ -24,7 +24,7 @@ def bs_options_pricing(S, K, r, T, sigma, option_type='Call'):
 
 
 
-def compute_metrics(y_true, y_pred, params=None, test_value=None):
+def compute_metrics(y_true, y_pred):
     try:
         mape = mean_absolute_percentage_error(y_true, y_pred)
         mae = mean_absolute_error(y_true, y_pred)
@@ -36,18 +36,6 @@ def compute_metrics(y_true, y_pred, params=None, test_value=None):
         print("y_pred:", y_pred)
         return None
 
-    if test_value is not None:
-        print('Test value', test_value)
-    
-    if params is not None:
-        for key, value in params.items():
-            print(key, ': ', value)
-    print('MAPE: ', mape)
-    print('MAE: ', mae)
-    print('MSE: ', mse)
-    print('R2: ', r2)
-    print('-----------------------------------')
-    print('\n')
     return mape, mae, mse, r2
 
 
@@ -63,6 +51,8 @@ def evaluate_bs_options_pricing(df_price, df_options):
     df_price['price_bs'] = df_options.apply(lambda row: bs_options_pricing(row['stock_price'], row['strike'], row['interest_rate'], row['time_to_maturity'], row['vol']), axis=1)
 
     y_true = df_price['price'].values
+    # check if NaN values are present in the price_bs column
+
     y_pred = df_price['price_bs'].values
     # Calculate metrics 
     print('Black-Scholes Options Pricing Model')

@@ -58,15 +58,17 @@ def create_batch_data_by_act_symbol(df, batch_size, features):
     return df_options_batch[features], df_options_batch['price']
 
 
-def create_train_test_set(X, y, test_size, standardize, df):
-    X_np = X.to_numpy()
-    y_np = y.to_numpy()
-    if test_size == 0:
+def create_train_test_set(X, y, test_size, standardize, df, pca, n_pc):
+    if test_size == 0 or test_size > 1:
         # Here we are in the case where we will we test on all the rest of the data (not used for training or validation) 
-        X_train = X_np
-        y_train = y_np
-        X_test = df.drop(X.index)[X.columns].to_numpy()
-        y_test = df.drop(y.index)[y.name].to_numpy()
+        X_train = X
+        y_train = y
+        X_test = df.drop(X.index)[X.columns]
+        y_test = df.drop(y.index)[y.name]
+        if test_size > 1:
+            # we take a sample of test set 
+            X_test = X_test.sample(n=test_size)
+            y_test = y_test.loc[X_test.index]
     else:
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=42)
     # Standardize data
@@ -77,7 +79,14 @@ def create_train_test_set(X, y, test_size, standardize, df):
         X_test_np = scaler.transform(X_test)
         X_train = pd.DataFrame(X_train_np, columns=X.columns)
         X_test = pd.DataFrame(X_test_np, columns=X.columns)
-    return X_train, X_test, y_train, y_test, scaler
+    if pca:
+        from sklearn.decomposition import PCA
+        pca = PCA(n_components=n_pc)
+        X_train_pca = pca.fit_transform(X_train)
+        X_test_pca = pca.transform(X_test)
+        X_train = pd.DataFrame(X_train_pca, columns=[f'PC_{i}' for i in range(n_pc)])
+        X_test = pd.DataFrame(X_test_pca, columns=[f'PC_{i}' for i in range(n_pc)])
+    return X_train, X_test, y_train, y_test, scaler, pca
 
 def create_train_test_set_sep(df, test_value, train_size, features):
     # We generate two differents random train test set 
@@ -86,19 +95,19 @@ def create_train_test_set_sep(df, test_value, train_size, features):
     return X_train, y_train, X_test, y_test
 
 
-def create_train_test_set_idx(df, test_size, batch_size, features, standardize):
+def create_train_test_set_idx(df, test_size, batch_size, features, standardize, pca = False, n_pc = 10):
     X, y = create_batch_data_idx_random(df, batch_size, features)
-    return create_train_test_set(X, y, test_size, standardize)
+    return create_train_test_set(X, y, test_size, standardize, df, pca, n_pc)
 
 
-def create_train_test_set_random(df, test_size, batch_size, features, standardize):
+def create_train_test_set_random(df, test_size, batch_size, features, standardize, pca, n_pc):
     X, y = create_batch_data_random(df, batch_size, features)
-    return create_train_test_set(X, y, test_size, standardize)
+    return create_train_test_set(X, y, test_size, standardize, df, pca, n_pc)
 
 
-def create_train_test_set_by_act_symbol(df, test_size, batch_size, features, standardize):
+def create_train_test_set_by_act_symbol(df, test_size, batch_size, features, standardize, pca = False, n_pc = 10):
     X, y = create_batch_data_by_act_symbol(df, batch_size, features)
-    return create_train_test_set(X, y, test_size, standardize, df)
+    return create_train_test_set(X, y, test_size, standardize, df, pca, n_pc)
 
 
 def from_np_to_df(X, y, features):
@@ -120,7 +129,7 @@ def find_risk_free_rate(df_r, date, maturity):
     # Filter data
     closest_key = min(DICT_CORRESPONDANCE_JOUR_IR, key=lambda x: abs(DICT_CORRESPONDANCE_JOUR_IR[x] - maturity))
 
-    # Calculate average risk-free rate
+    
     r = df_r['rate'].mean()
     return r
 
