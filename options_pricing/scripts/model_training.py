@@ -38,7 +38,7 @@ def train_test_gp_model(params, df_options_c):
             X_test_unscal = scaler.inverse_transform(X_test_unpca) # for bs model
             gp.fit(X_train, y_train)
             y_pred = gp.predict(X_test)
-            mape, mae, mse, r2 = bs.compute_metrics(y_test, y_pred, params, test_value)
+            mape, mae, mse, r2 = bs.compute_metrics(y_test, y_pred)
             tab_metrics[i] = [mape, mae, mse, r2]
 
             # for bs evaluation 
@@ -105,7 +105,7 @@ def train_test_dl_model(params, callbacks, df_options_c):
                 callbacks=callbacks
             ).history
             y_pred = model_with_callbacks.predict(X_test)
-            mape, mae, mse, r2 = bs.compute_metrics(y_test, y_pred, params, test_value)
+            mape, mae, mse, r2 = bs.compute_metrics(y_test, y_pred)
             tab_metrics[i] = [mape, mae, mse, r2]
 
             # for bs evaluation 

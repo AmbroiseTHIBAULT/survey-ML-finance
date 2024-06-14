@@ -55,7 +55,6 @@ def evaluate_bs_options_pricing(df_price, df_options):
 
     y_pred = df_price['price_bs'].values
     # Calculate metrics 
-    print('Black-Scholes Options Pricing Model')
     
     mape, mae, mse, r2 = compute_metrics(y_true, y_pred)
 
